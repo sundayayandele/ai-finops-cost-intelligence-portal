@@ -1,0 +1,8 @@
+fastapi==0.110.0
+uvicorn[standard]==0.27.0
+litellm==1.36.0
+redis[asyncio]==5.0.3
+aiokafka==0.10.0
+orjson==3.9.15
+numpy==1.26.4
+pydantic==2.6.0
