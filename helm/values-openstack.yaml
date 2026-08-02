@@ -1,0 +1,63 @@
+# ─── OpenStack Deployment Values ─────────────────────────────────────────────
+cloud:
+  provider: openstack
+  authUrl: "${OS_AUTH_URL}"
+  projectId: "${OS_PROJECT_ID}"
+  regionName: "RegionOne"
+  containerRegistry: "harbor.private.cloud"
+
+services:
+  azureIngestor:
+    enabled: false   # Disabled in OpenStack mode
+
+  openstackIngestor:
+    enabled: true
+    image: harbor.private.cloud/finops/openstack-ingestor:2.0
+    schedule: "*/5 * * * *"
+    env:
+      OS_AUTH_URL: "http://keystone.openstack.svc:5000/v3"
+      GNOCCHI_URL: "http://gnocchi.openstack.svc:8041"
+      VLLM_METRICS_URLS: "http://vllm-llama.ai.svc:8000/metrics,http://vllm-mistral.ai.svc:8000/metrics"
+
+  llmGateway:
+    enabled: true
+    image: harbor.private.cloud/finops/llm-gateway:2.0
+    replicas: 2
+    env:
+      VLLM_BASE_URL: "http://vllm-service.ai.svc:8000"
+      DEFAULT_CLOUD: "openstack"
+
+  apiBff:
+    enabled: true
+    image: harbor.private.cloud/finops/api-bff:2.0
+    replicas: 2
+    service: { type: LoadBalancer, port: 8000 }
+    ingress:
+      enabled: true
+      host: finops.private.cloud
+      tls: false
+
+  reactFrontend:
+    enabled: true
+    image: harbor.private.cloud/finops/react-dashboard:2.0
+    replicas: 1
+
+storage:
+  timescale:
+    storageClass: ceph-rbd
+    size: 100Gi
+  clickhouse:
+    storageClass: ceph-rbd
+    size: 200Gi
+  kafka:
+    storageClass: ceph-rbd
+    size: 50Gi
+  redis:
+    storageClass: ceph-rbd
+    size: 10Gi
+
+gpuRates:
+  A100-80GB: 1.85
+  V100-16GB: 0.45
+  H100-80GB: 3.20
+  T4-16GB:   0.18
