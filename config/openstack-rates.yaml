@@ -1,0 +1,43 @@
+# OpenStack Internal Billing Rates — CapEx amortised (edit to match your hardware)
+# Formula: (hardware_cost + 3yr_ops_cost) / (3yr_hours * utilisation_factor)
+
+gpu_rates_usd_per_hour:
+  A100-80GB: 1.85   # NVIDIA A100 80GB SXM — 3yr amortised + ops
+  A100-40GB: 1.20   # NVIDIA A100 40GB PCIe
+  V100-16GB: 0.45   # NVIDIA V100 16GB
+  H100-80GB: 3.20   # NVIDIA H100 80GB — 3yr amortised
+  T4-16GB:   0.18   # NVIDIA T4 16GB (inference-optimised)
+  A30:       0.65   # NVIDIA A30 24GB
+  A10:       0.52   # NVIDIA A10 24GB
+
+cpu_rates_usd_per_vcpu_hour:
+  standard: 0.015   # Standard compute
+  high-mem:  0.022  # High-memory instances
+  high-cpu:  0.018  # CPU-optimised instances
+
+vllm_rates_per_1k_tokens:
+  llama-3-70b:
+    input:  0.0003
+    output: 0.0006
+  llama-3-8b:
+    input:  0.0001
+    output: 0.0002
+  mistral-7b:
+    input:  0.00005
+    output: 0.0001
+  mixtral-8x7b:
+    input:  0.00015
+    output: 0.0003
+  deepseek-r1:
+    input:  0.0002
+    output: 0.0004
+
+# Nova flavor → GPU type mapping
+nova_flavor_gpu_map:
+  "gpu.a100.80gb.1": "A100-80GB"
+  "gpu.a100.40gb.1": "A100-40GB"
+  "gpu.v100.16gb.1": "V100-16GB"
+  "gpu.h100.80gb.1": "H100-80GB"
+  "gpu.t4.16gb.1":   "T4-16GB"
+  "gpu.a30.24gb.1":  "A30"
+  "gpu.a10.24gb.1":  "A10"
