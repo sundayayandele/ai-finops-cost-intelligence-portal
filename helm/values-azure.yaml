@@ -1,0 +1,61 @@
+# ─── Azure Deployment Values ──────────────────────────────────────────────────
+cloud:
+  provider: azure
+  subscriptionId: "${AZURE_SUBSCRIPTION_ID}"
+  tenantId: "${AZURE_TENANT_ID}"
+  workloadIdentity: true
+  keyVaultName: "ai-finops-kv"
+  containerRegistry: "myacr.azurecr.io"
+
+services:
+  azureIngestor:
+    enabled: true
+    image: myacr.azurecr.io/azure-ingestor:2.0
+    schedule: "*/5 * * * *"
+    resources:
+      requests: { cpu: "100m", memory: "256Mi" }
+      limits:   { cpu: "500m", memory: "512Mi" }
+
+  openstackIngestor:
+    enabled: false   # Disabled in Azure-only mode
+
+  llmGateway:
+    enabled: true
+    image: myacr.azurecr.io/llm-gateway:2.0
+    replicas: 3
+    hpa: { minReplicas: 2, maxReplicas: 10, targetCPUUtilizationPercentage: 70 }
+    env:
+      VLLM_BASE_URL: ""  # Empty in Azure mode
+
+  apiBff:
+    enabled: true
+    image: myacr.azurecr.io/api-bff:2.0
+    replicas: 2
+    hpa: { minReplicas: 2, maxReplicas: 10, targetCPUUtilizationPercentage: 70 }
+    service: { type: ClusterIP, port: 8000 }
+    ingress:
+      enabled: true
+      host: finops.contoso.com
+      tls: true
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+
+  reactFrontend:
+    enabled: true
+    image: myacr.azurecr.io/react-dashboard:2.0
+    replicas: 2
+
+storage:
+  timescale:
+    storageClass: managed-premium
+    size: 100Gi
+  clickhouse:
+    storageClass: managed-premium
+    size: 200Gi
+  kafka:
+    storageClass: managed-standard
+    size: 50Gi
+  redis:
+    storageClass: managed-standard
+    size: 10Gi
