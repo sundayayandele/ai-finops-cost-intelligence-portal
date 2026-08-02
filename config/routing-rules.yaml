@@ -1,0 +1,48 @@
+# LLM Routing Rules — evaluated in order, first match wins
+rules:
+  - name: data-residency-eu
+    description: "EU/regulated data must stay on-premises (OpenStack)"
+    condition:
+      header: "X-Data-Residency"
+      value: "eu-regulated"
+    route: openstack
+    override: true   # Cannot be overridden by cost or latency
+
+  - name: cost-threshold-openstack
+    description: "Route to OpenStack if estimated cost < $0.001/call and model available"
+    condition:
+      estimated_cost_usd: { lt: 0.001 }
+      model_available_on: openstack
+    route: openstack
+
+  - name: latency-sla-azure
+    description: "High-latency-sensitive workloads stay on Azure OpenAI"
+    condition:
+      header: "X-Latency-SLA"
+      value: "200ms"
+    route: azure
+
+  - name: frontier-models-azure
+    description: "GPT-4o, o3, o1 always on Azure (no OpenStack equivalent)"
+    condition:
+      model: ["gpt-4o", "gpt-4", "o3-mini", "o1"]
+    route: azure
+
+  - name: simple-tasks-openstack
+    description: "Classification, summarisation, simple extraction → OpenStack 7B models"
+    condition:
+      task_type: ["classification", "summarisation", "extraction"]
+    route: openstack
+    model_override: "mistral-7b"
+
+  - name: batch-inference-openstack
+    description: "Async batch jobs → always OpenStack (not time-sensitive)"
+    condition:
+      header: "X-Request-Type"
+      value: "batch"
+    route: openstack
+
+  - name: default
+    description: "Default: prefer OpenStack for cost if model available"
+    condition: {}
+    route: auto   # auto = check OpenStack first, fallback Azure
