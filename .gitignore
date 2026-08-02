@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.env
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# Node / React
+node_modules/
+frontend/dist/
+frontend/.vite/
+*.tsbuildinfo
+
+# Secrets
+.env
+secrets/
+*.key
+*.pem
+
+# Docker
+.docker/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
