@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ai-finops-config
+  namespace: {{ .Release.Namespace }}
+data:
+  KAFKA_BOOTSTRAP: "kafka:9092"
+  CLICKHOUSE_HOST: "clickhouse"
+  CLOUD_PROVIDER: "{{ .Values.cloud.provider }}"
+  OS_REGION_NAME: "{{ .Values.cloud.regionName | default \"RegionOne\" }}"
+  OS_RATE_A100_80GB: "{{ .Values.gpuRates.A10080GB | default 1.85 }}"
+  OS_RATE_V100: "{{ .Values.gpuRates.V10016GB | default 0.45 }}"
+  OS_RATE_H100: "{{ .Values.gpuRates.H10080GB | default 3.20 }}"
+  OS_RATE_T4: "{{ .Values.gpuRates.T416GB | default 0.18 }}"
