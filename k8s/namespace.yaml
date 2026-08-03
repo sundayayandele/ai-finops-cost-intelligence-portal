@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ai-finops
+  labels:
+    app.kubernetes.io/managed-by: helm
+    finops.ai/cloud: dual-cloud
