@@ -1,0 +1,12 @@
+apiVersion: v2
+name: ai-finops-portal
+description: Dual-Cloud AI FinOps Cost Intelligence Portal — Azure + OpenStack
+type: application
+version: 2.0.0
+appVersion: "2.0"
+keywords: [finops, ai, azure, openstack, llm, cost-optimisation]
+maintainers:
+  - name: Sunday Ayandele
+    url: https://github.com/sundayayandele
+sources:
+  - https://github.com/sundayayandele/ai-finops-cost-intelligence-portal
