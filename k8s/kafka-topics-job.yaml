@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kafka-create-topics
+  namespace: ai-finops
+spec:
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: kafka-topics
+          image: confluentinc/cp-kafka:7.6.0
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              TOPICS=(
+                "azure.openai.usage:8"
+                "azure.foundry.jobs:4"
+                "azure.billing.daily:2"
+                "azure.ml.compute:4"
+                "openstack.vllm.usage:8"
+                "openstack.nova.gpu:4"
+                "openstack.ceilometer.samples:4"
+                "ai.costs.unified:8"
+                "ai.anomalies:4"
+                "ai.recommendations:2"
+                "ai.costs.dlq:2"
+              )
+              for TOPIC_DEF in "${TOPICS[@]}"; do
+                TOPIC="${TOPIC_DEF%%:*}"
+                PARTS="${TOPIC_DEF##*:}"
+                kafka-topics --bootstrap-server $KAFKA_BOOTSTRAP \
+                  --create --if-not-exists \
+                  --topic "$TOPIC" --partitions "$PARTS" \
+                  --config retention.ms=604800000
+                echo "Created: $TOPIC ($PARTS partitions)"
+              done
+          env:
+            - name: KAFKA_BOOTSTRAP
+              valueFrom:
+                configMapKeyRef:
+                  name: ai-finops-config
+                  key: KAFKA_BOOTSTRAP
